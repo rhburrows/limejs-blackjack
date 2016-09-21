@@ -10,6 +10,9 @@
 
   var WIDTH  = 1024;
   var HEIGHT = 768;
+  var CARD_WIDTH = 100;
+  // cards are 2.5" x 3.5"
+  var CARD_HEIGHT = 100 * (3.5 / 2.5);
   var SUIT_OFFSETS = [ "CLUBS", "DIAMONDS", "HEARTS", "SPADES" ];
 
   //================================================================================
@@ -40,6 +43,10 @@
       return intToCard(i);
     });
     goog.array.shuffle(this.deck);
+
+    // Technically we're dealing out of order...
+    this.dealerHand = [ this.deck.pop(), this.deck.pop() ];
+    this.playerHands = [[ this.deck.pop(), this.deck.pop() ]];
   }
 
   //================================================================================
@@ -72,11 +79,44 @@
       goog.events.listen(startButton, ['mousedown','touchstart'], this.start.bind(this));
 
       newView.appendChild(startButton);
+    } else {
+      addGameView(this.game, newView);
     }
 
     this.view.removeAllChildren();
     this.view.appendChild(newView);
   };
+
+  function addGameView(game, parentView) {
+    var dealerHand = new lime.Node().setPosition(200, 150);
+    addHand(game.dealerHand, dealerHand, true);
+
+    var playerHands = new lime.Node().setPosition(200, 550);
+    goog.array.forEach(game.playerHands, function(hand) {
+      addHand(hand, playerHands, false);
+    });
+
+    parentView.appendChild(dealerHand);
+    parentView.appendChild(playerHands);
+  }
+
+  function addHand(hand, node, isDealer) {
+    var offset = 0;
+    for (var i = 0; i < hand.length; i++) {
+      var card = hand[i];
+      var cardView = new lime.Sprite()
+          .setSize(CARD_WIDTH, CARD_HEIGHT)
+          .setPosition(offset, 0);
+      if (isDealer && i < hand.length - 1) {
+        cardView.setFill('images/back.png');
+      } else {
+        cardView.setFill(card.image);
+      }
+      node.appendChild(cardView);
+
+      offset += 25;
+    }
+  }
 
   //================================================================================
   // Entry Point
