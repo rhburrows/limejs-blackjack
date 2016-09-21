@@ -11,7 +11,9 @@
   var WIDTH  = 1024;
   var HEIGHT = 768;
   var CARD_WIDTH = 100;
-  // cards are 2.5" x 3.5"
+  var DEAL_DELAY = 500;
+
+  // playing cards are 2.5" x 3.5"
   var CARD_HEIGHT = 100 * (3.5 / 2.5);
   var SUIT_OFFSETS = [ "CLUBS", "DIAMONDS", "HEARTS", "SPADES" ];
 
@@ -72,10 +74,29 @@
     });
     goog.array.shuffle(this.deck);
 
-    // Technically we're dealing out of order...
-    this.dealerHand = [ this.deck.pop(), this.deck.pop() ];
-    this.playerHands = [[ this.deck.pop(), this.deck.pop() ]];
+    this.dealerHand = [];
+    this.playerHands = [[]];
+    this.currentHand = this.playerHands[0];
+    this.state = 'dealing';
   }
+
+  Game.prototype.dealCard = function() {
+    if (this.state !== 'dealing') return;
+
+    this.currentHand.unshift(this.deck.pop());
+    var currentHandIndex = this.playerHands.indexOf(this.currentHand);
+    if (currentHandIndex === -1) {
+      if (this.currentHand.length == 2) {
+        this.state = 'player-turn';
+      }
+
+      this.currentHand = this.playerHands[0];
+    } else if (currentHandIndex === this.playerHands.length - 1) {
+      this.currentHand = this.dealerHand;
+    } else {
+      this.currentHand = this.playerHands[currentHandIndex + 1];
+    }
+  };
 
   //================================================================================
   // Game Controller / Views
@@ -90,7 +111,13 @@
   GameController.prototype.start = function() {
     this.game = new Game();
     this.redraw();
+    lime.scheduleManager.scheduleWithDelay(this.deal, this, DEAL_DELAY);
   };
+
+  GameController.prototype.deal = function() {
+    this.game.dealCard();
+    this.redraw();
+  }
 
   GameController.prototype.redraw = function() {
     var newView = new lime.Node();
