@@ -1,5 +1,6 @@
 goog.provide("blackjack.Controller");
 
+goog.require("lime.Scene");
 goog.require("lime.Node");
 goog.require("lime.RoundedRect");
 goog.require("lime.Label");
@@ -16,9 +17,18 @@ goog.require("blackjack.Game");
   var DEALER_DELAY = 500;
 
   blackjack.Controller = function() {
+    this.scene = new lime.Scene().setRenderer(lime.Renderer.CANVAS);
+    var background = new lime.Sprite()
+        .setFill("images/background.png")
+        .setSize(WIDTH, HEIGHT)
+        .setAnchorPoint(0, 0);
+    this.scene.appendChild(background);
+
     this.view = new lime.Node()
       .setSize(WIDTH, HEIGHT)
       .setAnchorPoint(0, 0);
+    this.scene.appendChild(this.view);
+
     this.redraw();
   };
 
