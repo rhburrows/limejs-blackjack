@@ -11,7 +11,7 @@
   var WIDTH  = 1024;
   var HEIGHT = 768;
   var CARD_WIDTH = 100;
-  var DEAL_DELAY = 500;
+  var DEALER_DELAY = 500;
 
   // playing cards are 2.5" x 3.5"
   var CARD_HEIGHT = 100 * (3.5 / 2.5);
@@ -98,6 +98,16 @@
     }
   };
 
+  Game.prototype.checkForBlackjacks = function() {
+    if (isBlackjack(this.dealerHand) && isBlackjack(this.playerHands[0])) {
+      this.state = 'draw';
+    } else if (isBlackjack(this.dealerHand)) {
+      this.state = 'dealer-wins';
+    } else if (isBlackjack(this.playerHands[0])) {
+      this.state = 'player-wins';
+    }
+  };
+
   //================================================================================
   // Game Controller / Views
   //================================================================================
@@ -111,11 +121,22 @@
   GameController.prototype.start = function() {
     this.game = new Game();
     this.redraw();
-    lime.scheduleManager.scheduleWithDelay(this.deal, this, DEAL_DELAY);
+    lime.scheduleManager.scheduleWithDelay(this.dealerAction, this, DEALER_DELAY);
   };
 
-  GameController.prototype.deal = function() {
-    this.game.dealCard();
+  GameController.prototype.dealerAction = function() {
+    switch(this.game.state) {
+    case "dealing":
+      this.game.dealCard();
+      break;
+    case "player-turn":
+      this.game.checkForBlackjacks();
+      break;
+    case "dealerTurn":
+      //this.game.takeDealerAction();
+      break;
+    } 
+
     this.redraw();
   }
 
@@ -138,11 +159,36 @@
       addGameView(this.game, newView);
     }
 
+    if (this.game && this.game.state === 'player-wins') {
+      var playerWinLabel = new lime.Label()
+          .setText("You win!")
+          .setFontColor("#000")
+          .setFontSize(50)
+          .setPosition(WIDTH / 2 - 100, HEIGHT / 2);
+      newView.appendChild(playerWinLabel);
+    } else if (this.game && this.game.state === 'dealer-wins') {
+      var dealerWinLabel = new lime.Label()
+          .setText("Dealer wins!")
+          .setFontColor("#000")
+          .setFontSize(50)
+          .setPosition(WIDTH / 2 - 100, HEIGHT / 2);
+      newView.appendChild(dealerWinLabel);
+    } else if (this.game && this.game.state === 'draw') {
+      var drawLabel = new lime.Label()
+          .setText("Its a draw")
+          .setFontColor("#000")
+          .setFontSize(50)
+          .setPosition(WIDTH / 2 - 100, HEIGHT / 2);
+      newView.appendChild(drawLabel);
+    }
+
     this.view.removeAllChildren();
     this.view.appendChild(newView);
   };
 
   function addGameView(game, parentView) {
+    var node = new lime.Node();
+
     var dealerHand = new lime.Node().setPosition(200, 100);
     addHand(game.dealerHand, dealerHand, true);
 
@@ -151,8 +197,10 @@
       addHand(hand, playerHands, false);
     });
 
-    parentView.appendChild(dealerHand);
-    parentView.appendChild(playerHands);
+    node.appendChild(dealerHand);
+    node.appendChild(playerHands);
+
+    parentView.appendChild(node);
   }
 
   function addHand(hand, node, isDealer) {
