@@ -38,6 +38,34 @@
     card.value * SUIT_OFFSETS.indexOf(card.suit);
   }
 
+  // Calculate the highest possible score for the hand
+  function handScore(hand) {
+    var score = 0;
+    var aceCount = 0;
+
+    goog.array.forEach(hand, function(card) {
+      if (card.value >= 10) {
+        score += 10;
+      } else if (card.value === 1) {
+        score += 11;
+        aceCount++;
+      } else {
+        score += card.value;
+      }
+    });
+
+    while (score > 21 && aceCount > 0) {
+      score -= 10;
+      aceCount--;
+    }
+
+    return score;
+  }
+
+  function isBlackjack(hand) {
+    return handScore(hand) === 21 && hand.length === 2;
+  }
+
   function Game() {
     this.deck = goog.array.map(goog.array.range(1, 53), function(i) {
       return intToCard(i);
@@ -88,10 +116,10 @@
   };
 
   function addGameView(game, parentView) {
-    var dealerHand = new lime.Node().setPosition(200, 150);
+    var dealerHand = new lime.Node().setPosition(200, 100);
     addHand(game.dealerHand, dealerHand, true);
 
-    var playerHands = new lime.Node().setPosition(200, 550);
+    var playerHands = new lime.Node().setPosition(200, 500);
     goog.array.forEach(game.playerHands, function(hand) {
       addHand(hand, playerHands, false);
     });
@@ -102,11 +130,19 @@
 
   function addHand(hand, node, isDealer) {
     var offset = 0;
+    if (!isDealer) {
+      var scoreLabel = new lime.Label()
+          .setText("Score: " + handScore(hand))
+          .setFontColor('#000')
+          .setPosition(0, -30);
+      node.appendChild(scoreLabel);
+    }
+
     for (var i = 0; i < hand.length; i++) {
       var card = hand[i];
       var cardView = new lime.Sprite()
           .setSize(CARD_WIDTH, CARD_HEIGHT)
-          .setPosition(offset, 0);
+          .setPosition(offset, 50);
       if (isDealer && i < hand.length - 1) {
         cardView.setFill('images/back.png');
       } else {
