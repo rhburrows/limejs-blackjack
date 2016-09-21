@@ -1,13 +1,13 @@
+goog.provide('blackjack');
+
+goog.require('lime.Director');
+goog.require('lime.Scene');
+goog.require('lime.Sprite');
+goog.require('lime.Node');
+goog.require('lime.RoundedRect');
+goog.require('lime.Label');
+
 (function() {
-  goog.provide('blackjack');
-
-  goog.require('lime.Director');
-  goog.require('lime.Scene');
-  goog.require('lime.Sprite');
-  goog.require('lime.Node');
-  goog.require('lime.RoundedRect');
-  goog.require('lime.Label');
-
   var WIDTH  = 1024;
   var HEIGHT = 768;
   var CARD_WIDTH = 100;
@@ -34,10 +34,6 @@
       suit: SUIT_OFFSETS[suitIndex],
       image: "images/" + suitChar + paddedValue + ".png"
     };
-  }
-
-  function cardToInt(card) {
-    card.value * SUIT_OFFSETS.indexOf(card.suit);
   }
 
   // Calculate the highest possible score for the hand
