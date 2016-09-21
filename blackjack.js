@@ -1,26 +1,51 @@
-//set main namespace
-goog.provide('blackjack');
+(function() {
+  goog.provide('blackjack');
 
-//get requirements
-goog.require('lime.Director');
-goog.require('lime.Scene');
-goog.require('lime.Sprite');
+  goog.require('lime.Director');
+  goog.require('lime.Scene');
+  goog.require('lime.Sprite');
+  goog.require('lime.Node');
 
-// entrypoint
-blackjack.start = function() {
   var WIDTH  = 1024;
   var HEIGHT = 768;
+  var NUM_DECKS = 4;
+  var SUIT_OFFSETS = [ "CLUBS", "DIAMONDS", "HEARTS", "SPADES" ];
 
-  var director = new lime.Director(document.body);
-  var scene = new lime.Scene().setRenderer(lime.Renderer.DOM);
-  var background = new lime.Sprite()
-      .setFill('images/background.png')
+  //================================================================================
+  // Game Model
+  //================================================================================
+  function Game() {
+    this.deck = [];
+  }
+
+  //================================================================================
+  // Game Controller / Views
+  //================================================================================
+  function GameController(game) {
+    this.game = game;
+    this.view = new lime.Node()
       .setSize(WIDTH, HEIGHT)
       .setAnchorPoint(0, 0);
+  }
 
-  scene.appendChild(background);
-  director.replaceScene(scene);
-};
+  //================================================================================
+  // Entry Point
+  //================================================================================
+  blackjack.start = function() {
+    var director = new lime.Director(document.body);
+    var scene = new lime.Scene().setRenderer(lime.Renderer.DOM);
+    var background = new lime.Sprite()
+        .setFill('images/background.png')
+        .setSize(WIDTH, HEIGHT)
+        .setAnchorPoint(0, 0);
 
-//this is required for outside access after code is compiled in ADVANCED_COMPILATIONS mode
-goog.exportSymbol('blackjack.start', blackjack.start);
+    var game = new Game();
+    var gameController = new GameController(game);
+
+    scene.appendChild(background);
+    scene.appendChild(gameController.view);
+    director.replaceScene(scene);
+  };
+
+  goog.exportSymbol('blackjack.start', blackjack.start);
+})();
