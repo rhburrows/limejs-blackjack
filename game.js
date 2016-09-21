@@ -62,7 +62,7 @@ goog.provide("blackjack.game");
   blackjack.Game.prototype.dealCard = function() {
     if (this.state !== 'dealing') return;
 
-    this.currentHand.unshift(this.deck.pop());
+    this.currentHand.push(this.deck.pop());
     var currentHandIndex = this.playerHands.indexOf(this.currentHand);
     if (currentHandIndex === -1) {
       if (this.currentHand.length == 2) {

@@ -114,7 +114,7 @@ goog.require("blackjack.Game");
       var cardView = new lime.Sprite()
           .setSize(CARD_WIDTH, CARD_HEIGHT)
           .setPosition(offset, 50);
-      if (isDealer && i < hand.length - 1) {
+      if (isDealer && i == 0) {
         cardView.setFill('images/back.png');
       } else {
         cardView.setFill(card.image);
