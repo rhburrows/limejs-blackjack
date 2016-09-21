@@ -1,4 +1,6 @@
-goog.provide("blackjack.game");
+goog.provide("blackjack.Game");
+
+goog.require("blackjack.Hand");
 
 (function() {
   var SUIT_OFFSETS = [ "CLUBS", "DIAMONDS", "HEARTS", "SPADES" ];
@@ -19,42 +21,14 @@ goog.provide("blackjack.game");
     };
   }
 
-  // Calculate the highest possible score for the hand
-  function handScore(hand) {
-    var score = 0;
-    var aceCount = 0;
-
-    goog.array.forEach(hand, function(card) {
-      if (card.value >= 10) {
-        score += 10;
-      } else if (card.value === 1) {
-        score += 11;
-        aceCount++;
-      } else {
-        score += card.value;
-      }
-    });
-
-    while (score > 21 && aceCount > 0) {
-      score -= 10;
-      aceCount--;
-    }
-
-    return score;
-  }
-
-  function isBlackjack(hand) {
-    return handScore(hand) === 21 && hand.length === 2;
-  }
-
   blackjack.Game = function() {
     this.deck = goog.array.map(goog.array.range(1, 53), function(i) {
       return intToCard(i);
     });
     goog.array.shuffle(this.deck);
 
-    this.dealerHand = [];
-    this.playerHands = [[]];
+    this.dealerHand = new blackjack.Hand();
+    this.playerHands = [ new blackjack.Hand() ];
     this.currentHand = this.playerHands[0];
     this.state = 'dealing';
   };
@@ -65,7 +39,7 @@ goog.provide("blackjack.game");
     this.currentHand.push(this.deck.pop());
     var currentHandIndex = this.playerHands.indexOf(this.currentHand);
     if (currentHandIndex === -1) {
-      if (this.currentHand.length == 2) {
+      if (this.currentHand.cards.length == 2) {
         this.state = 'player-turn';
       }
 
@@ -78,11 +52,11 @@ goog.provide("blackjack.game");
   };
 
   blackjack.Game.prototype.checkForBlackjacks = function() {
-    if (isBlackjack(this.dealerHand) && isBlackjack(this.playerHands[0])) {
+    if (this.dealerHand.isBlackjack() && this.playerHands[0].isBlackjack()) {
       this.state = 'draw';
-    } else if (isBlackjack(this.dealerHand)) {
+    } else if (this.dealerHand.isBlackjack()) {
       this.state = 'dealer-wins';
-    } else if (isBlackjack(this.playerHands[0])) {
+    } else if (this.playerHands[0].isBlackjack()) {
       this.state = 'player-wins';
     }
   };

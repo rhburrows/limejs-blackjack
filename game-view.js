@@ -82,8 +82,8 @@ goog.require("lime.Sprite");
 
   function addHand(hand, node, isDealer) {
     var offset = 0;
-    for (var i = 0; i < hand.length; i++) {
-      var card = hand[i];
+    for (var i = 0; i < hand.cards.length; i++) {
+      var card = hand.cards[i];
       var cardView = new lime.Sprite()
           .setSize(CARD_WIDTH, CARD_HEIGHT)
           .setPosition(offset, 50);
