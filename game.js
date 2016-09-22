@@ -94,6 +94,7 @@ goog.require("blackjack.Hand");
 
   blackjack.Game.prototype.checkNaturals = function() {
     if (this.dealerHand.isBlackjack()) {
+      this.dealerHand.win();
       goog.array.forEach(this.playerHands, function(hand) {
         if (!hand.isBlackjack()) {
           hand.lose();
@@ -158,6 +159,7 @@ goog.require("blackjack.Hand");
       this.currentHand.lose();
       this.nextHand();
     } else if (this.currentHand.score() === 21) {
+      this.currentHand.stand();
       this.nextHand();
     }
   }
