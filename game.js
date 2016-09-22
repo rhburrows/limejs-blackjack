@@ -31,6 +31,7 @@ goog.require("blackjack.Hand");
     if (amount > this.playerMoney) return;
 
     this.playerMoney -= amount;
+
     this.shuffle();
     this.dealerHand = new blackjack.Hand();
     this.playerHands = [ new blackjack.Hand(amount) ];
@@ -50,22 +51,24 @@ goog.require("blackjack.Hand");
 
     this.currentHand.push(this.deck.pop());
     if (this.currentHand === this.dealerHand && this.dealerHand.cards.length == 2) {
-      this.state = 'player-turn';
+      this.checkNaturals();
+      return;
     }
 
     this.nextHand();
   };
 
   blackjack.Game.prototype.takeDealerAction = function() {
-    if (this.dealerHand.state === 'live') {
+    if (this.dealerHand.state == 'live') {
       this.dealerHand.state = 'processing';
       // Flipping the face down card counts as an action
       return;
     }
 
-    if (this.dealerHand.state !== 'processing') return;
+    if (this.dealerHand.state != 'processing') return;
+
     if (this.dealerHand.score() < 17) {
-      this.hit();
+      this.dealerHand.push(this.deck.pop());
     } else {
       this.checkHands();
     }
@@ -75,13 +78,13 @@ goog.require("blackjack.Hand");
     goog.array.forEach(this.playerHands, function(hand) {
       if (hand.state != 'waiting') return;
 
-      if (hand.score() > this.dealerHand.score()) {
-        this.playerScore += (2 * hand.bet);
+      if (hand.score() > this.dealerHand.score() || this.dealerHand.score() > 21) {
+        this.playerMoney += (2 * hand.bet);
         hand.win();
       } else if (this.dealerHand.score() > hand.score()) {
         hand.lose();
       } else {
-        this.playerScore += hand.bet;
+        this.playerMoney += hand.bet;
         hand.draw();
       }
     }, this);
@@ -89,45 +92,52 @@ goog.require("blackjack.Hand");
     this.state = 'complete';
   };
 
-  blackjack.Game.prototype.checkCurrentHand = function() {
-    if (this.currentHand === this.dealerHand && this.dealerHand.isBlackjack()) {
-      this.dealerHand.win();
+  blackjack.Game.prototype.checkNaturals = function() {
+    if (this.dealerHand.isBlackjack()) {
+      goog.array.forEach(this.playerHands, function(hand) {
+        if (!hand.isBlackjack()) {
+          hand.lose();
+        } else {
+          this.playerMoney += hand.bet;
+          hand.draw();
+        }
+      }, this);
+    } else {
+      goog.array.forEach(this.playerHands, function(hand) {
+        if (hand.isBlackjack()) {
+          this.playerMoney += (1.5 * hand.bet);
+          hand.win();
+        }
+      }, this);
     }
 
-    if (this.currentHand === this.dealerHand ||
-        this.currentHand.state !== 'live') {
-      return;
-    }
+    var firstLiveHand = goog.array.find(this.playerHands, function(hand) {
+      return hand.state == 'live' || hand.state == 'waiting';
+    }, this);
 
-    if (this.dealerHand.isBlackjack() && this.currentHand.isBlackjack()) {
-      this.playerMoney += this.currentHand.bet;
-      this.currentHand.draw();
-    } else if (this.dealerHand.isBlackjack()) {
-      this.currentHand.lose();
-    } else if (this.currentHand.isBlackjack()) {
-      this.playerMoney += (2 * this.currentHand.bet);
-      this.currentHand.win();
-      this.nextHand();
+    if (firstLiveHand) {
+      this.currentHand = firstLiveHand;
+      this.state = 'player-turn';
+    } else {
+      this.state = 'complete';
     }
-  };
+  }
 
   blackjack.Game.prototype.nextHand = function() {
-    var originalHand = this.currentHand;
     var currentHandIndex = this.playerHands.indexOf(this.currentHand);
     if (currentHandIndex === -1) {
       this.currentHand = this.playerHands[0];
     } else if (currentHandIndex === this.playerHands.length - 1) {
       this.currentHand = this.dealerHand;
+
+      if (this.state !== 'dealing') {
+        this.state = 'dealer-turn';
+      }
     } else {
       this.currentHand = this.playerHands[currentHandIndex + 1];
     }
 
-    if (this.currentHand === originalHand) {
-      this.state = 'complete';
-      return;
-    }
-
-    if (this.currentHand.state !== 'live') {
+    if (this.currentHand !== this.dealerHand && this.currentHand.state !== 'live') {
       this.nextHand();
     }
   };
@@ -143,6 +153,13 @@ goog.require("blackjack.Hand");
 
   blackjack.Game.prototype.hit = function() {
     this.currentHand.push(this.deck.pop());
+
+    if (this.currentHand.score() > 21) {
+      this.currentHand.lose();
+      this.nextHand();
+    } else if (this.currentHand.score() === 21) {
+      this.nextHand();
+    }
   }
 
   blackjack.Game.prototype.userActions = function() {

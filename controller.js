@@ -38,9 +38,6 @@ goog.require("blackjack.GameView");
     case "dealing":
       this.game.dealCard();
       break;
-    case "player-turn":
-      this.game.checkCurrentHand();
-      break;
     case "dealer-turn":
       this.game.takeDealerAction();
       break;
