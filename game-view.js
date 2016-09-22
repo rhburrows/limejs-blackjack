@@ -9,6 +9,31 @@ goog.require("lime.Sprite");
   var CARD_WIDTH  = 100;
   var CARD_HEIGHT = CARD_WIDTH * (3.5 / 2.5);
 
+  function createButton(label, opts, callback) {
+    var displayOptions = {
+      fill: "#c00",
+      width: 250,
+      height: 50,
+      borderWidth: 1,
+      borderColor: "#000",
+      fontColor: "#fff"
+    };
+    goog.object.extend(displayOptions, opts);
+
+    var rect = new lime.RoundedRect()
+        .setFill(displayOptions.fill)
+        .setSize(displayOptions.width, displayOptions.height)
+        .setStroke(displayOptions.borderWidth,displayOptions.borderColor);
+    var buttonLabel = new lime.Label()
+        .setText(label)
+        .setFontColor(displayOptions.fontColor);
+    rect.appendChild(buttonLabel);
+
+    goog.events.listen(rect, ['mousedown', 'touchstart'], callback);
+
+    return rect;
+  }
+
   blackjack.GameView = function(width, height) {
     this.width = width;
     this.height = height;
@@ -20,17 +45,8 @@ goog.require("lime.Sprite");
   blackjack.GameView.prototype.render = function(controller, game) {
     var newView = new lime.Node();
     if (!game) {
-      var startButton = new lime.RoundedRect()
-          .setFill('#c00')
-          .setSize(250, 50)
-          .setStroke(1, '#000')
-          .setPosition(this.width / 2 - 125, this.height / 2 - 25);
-      var startLabel = new lime.Label()
-          .setText('Start Game')
-          .setFontColor('#fff');
-      startButton.appendChild(startLabel);
-      goog.events.listen(startButton, ['mousedown','touchstart'], controller.start.bind(controller));
-
+      var startButton = createButton("Start Game", {}, controller.start.bind(controller));
+      startButton.setPosition(this.width / 2 - 125, this.height / 2 - 25);
       newView.appendChild(startButton);
     } else {
       addGameView(game, newView);
