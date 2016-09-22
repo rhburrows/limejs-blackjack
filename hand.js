@@ -38,6 +38,11 @@ goog.provide("blackjack.Hand");
     return this.score() === 21 && this.cards.length === 2;
   };
 
+  blackjack.Hand.prototype.isAPair = function() {
+    return this.cards.length === 2 &&
+      this.cards[0].value == this.cards[1].value;
+  };
+
   blackjack.Hand.prototype.stand = function() {
     this.state = 'waiting';
   };

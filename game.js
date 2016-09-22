@@ -5,6 +5,7 @@ goog.require("blackjack.Hand");
 (function() {
   var SUIT_OFFSETS = [ "CLUBS", "DIAMONDS", "HEARTS", "SPADES" ];
   var ALLOWED_BETS = [ 10, 20, 50, 100 ];
+  var NUM_DECKS = 4;
 
   function intToCard(i) {
     var suitIndex = Math.floor((i - 1) / 13)
@@ -40,9 +41,13 @@ goog.require("blackjack.Hand");
   };
 
   blackjack.Game.prototype.shuffle = function() {
-    this.deck = goog.array.map(goog.array.range(1, 53), function(i) {
-      return intToCard(i);
-    });
+    this.deck = []
+    for (var i = 0; i < NUM_DECKS; i++) {
+      this.deck = this.deck.concat(goog.array.map(goog.array.range(1, 53), function(i) {
+        return intToCard(i);
+      }));
+    }
+
     goog.array.shuffle(this.deck);
   };
 
@@ -177,6 +182,22 @@ goog.require("blackjack.Hand");
     this.nextHand();
   };
 
+  blackjack.Game.prototype.split = function() {
+    this.playerMoney -= this.currentHand.bet;
+
+    var newHand = new blackjack.Hand(this.currentHand.bet);
+    newHand.cards.push(this.currentHand.cards.shift());
+
+    this.playerHands.push(newHand);
+    window.playerHands = this.playerHands;
+  };
+
+  blackjack.Game.prototype.dealIfNeeded = function() {
+    if (this.currentHand.cards.length < 2) {
+      this.currentHand.cards.push(this.deck.pop());
+    }
+  };
+
   blackjack.Game.prototype.userActions = function() {
     var actions = {};
 
@@ -189,6 +210,10 @@ goog.require("blackjack.Hand");
       if (this.currentHand.cards.length === 2 &&
           this.playerMoney >= this.currentHand.bet) {
         actions["Double Down"] = this.doubleDown.bind(this);
+
+        if (this.currentHand.isAPair()) {
+          actions["Split"] = this.split.bind(this);
+        }
       }
     }
 

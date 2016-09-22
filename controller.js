@@ -41,6 +41,9 @@ goog.require("blackjack.GameView");
     case "dealer-turn":
       this.game.takeDealerAction();
       break;
+    case "player-turn":
+      this.game.dealIfNeeded();
+      break;
     } 
 
     this.redraw();

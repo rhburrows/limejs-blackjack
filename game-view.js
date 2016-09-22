@@ -106,20 +106,23 @@ goog.require("lime.Sprite");
 
   blackjack.GameView.prototype.renderHands = function(game, node, controller) {
     var parent = new lime.Node();
+    var offset = 0;
 
     var dealerHand = new lime.Node().setPosition(200, 100);
     this.renderHand(game.dealerHand, dealerHand, controller, true);
 
     var playerHands = new lime.Node().setPosition(200, 500);
     goog.array.forEach(game.playerHands, function(hand) {
-      this.renderHand(hand, playerHands, controller, false);
+      this.renderHand(hand, playerHands, controller, false, offset);
       if (hand === game.currentHand && game.state === 'player-turn') {
         var highlight = new lime.Sprite()
             .setSize(75, 5)
             .setFill('#fff')
-            .setPosition(0, -35);
+            .setPosition(offset, -35);
         playerHands.appendChild(highlight);
       }
+
+      offset += 200;
     }, this);
 
     parent.appendChild(dealerHand);
@@ -128,21 +131,22 @@ goog.require("lime.Sprite");
     node.appendChild(parent);
   };
 
-  blackjack.GameView.prototype.renderHand = function(hand, node, controller, isDealer) {
+  blackjack.GameView.prototype.renderHand = function(hand, node, controller, isDealer, start) {
+    var offset = start || 0;
+
     if (!isDealer) {
       if (hand.state === 'live') {
         var label = new lime.Label()
             .setText("Bet: $" + hand.bet)
-            .setPosition(0, -50);
+            .setPosition(offset, -50);
       } else {
         var label = new lime.Label()
             .setText(goog.string.toTitleCase(hand.state) + ": $" + hand.bet)
-            .setPosition(0, -50);
+            .setPosition(offset, -50);
       }
       node.appendChild(label);
     }
 
-    var offset = 0;
     for (var i = 0; i < hand.cards.length; i++) {
       var card = hand.cards[i];
       var cardView = new lime.Sprite()
