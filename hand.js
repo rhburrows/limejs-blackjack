@@ -4,6 +4,7 @@ goog.provide("blackjack.Hand");
   blackjack.Hand = function(bet) {
     this.cards = [];
     this.bet = bet;
+    this.state = 'live';
   }
 
   blackjack.Hand.prototype.push = function(card) {
@@ -39,5 +40,17 @@ goog.provide("blackjack.Hand");
 
   blackjack.Hand.prototype.possibleActions = function() {
     return ['hit', 'stand'];
+  };
+
+  blackjack.Hand.prototype.win = function() {
+    this.state = 'won';
+  };
+
+  blackjack.Hand.prototype.lose = function() {
+    this.state = 'lost';
+  };
+
+  blackjack.Hand.prototype.draw = function() {
+    this.state = 'draw';
   };
 })();

@@ -68,7 +68,7 @@ goog.require("lime.Sprite");
   };
 
   blackjack.GameView.prototype.renderBettingActions = function(game, node, controller) {
-    var betCount = game.allowedBets.length;
+    var betCount = game.allowedBets().length;
     var btnWidth = (this.width / betCount) - (50 * betCount);
     var xPos = (this.width / 2) - (betCount / 2) * (btnWidth + 50);
     var yPos = this.height / 2 - 50;
@@ -79,7 +79,7 @@ goog.require("lime.Sprite");
         .setFontSize(30)
         .setPosition(xPos + 50, yPos - 75);
     node.appendChild(label);
-    goog.array.forEach(game.allowedBets, function(bet) {
+    goog.array.forEach(game.allowedBets(), function(bet) {
       var btn = createButton("$" + bet, { width: btnWidth }, controller.bet.bind(controller, bet));
       btn.setPosition(xPos, yPos);
       node.appendChild(btn);
@@ -127,9 +127,15 @@ goog.require("lime.Sprite");
 
   blackjack.GameView.prototype.renderHand = function(hand, node, controller, isDealer) {
     if (!isDealer) {
-      var label = new lime.Label()
-          .setText("Bet: $" + hand.bet)
-          .setPosition(0, -50);
+      if (hand.state === 'live') {
+        var label = new lime.Label()
+            .setText("Bet: $" + hand.bet)
+            .setPosition(0, -50);
+      } else {
+        var label = new lime.Label()
+            .setText(goog.string.toTitleCase(hand.state) + ": $" + hand.bet)
+            .setPosition(0, -50);
+      }
       node.appendChild(label);
     }
 
@@ -139,7 +145,7 @@ goog.require("lime.Sprite");
       var cardView = new lime.Sprite()
           .setSize(CARD_WIDTH, CARD_HEIGHT)
           .setPosition(offset, 50);
-      if (isDealer && i == 0) {
+      if (isDealer && i == 0 && hand.state !== 'won') {
         cardView.setFill('images/back.png');
       } else {
         cardView.setFill(card.image);
