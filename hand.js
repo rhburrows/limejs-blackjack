@@ -42,6 +42,10 @@ goog.provide("blackjack.Hand");
     return ['hit', 'stand'];
   };
 
+  blackjack.Hand.prototype.stand = function() {
+    this.state = 'waiting';
+  };
+
   blackjack.Hand.prototype.win = function() {
     this.state = 'won';
   };

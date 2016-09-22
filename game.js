@@ -99,6 +99,7 @@ goog.require("blackjack.Hand");
   };
 
   blackjack.Game.prototype.stand = function() {
+    this.currentHand.stand();
     this.nextHand();
 
     if (this.currentHand === this.dealerHand) {
@@ -120,9 +121,8 @@ goog.require("blackjack.Hand");
   };
 
   blackjack.Game.prototype.allowedBets = function() {
-    // return goog.array.filter(ALLOWED_BETS, function(bet) {
-    //   return bet > this.playerMoney;
-    // }, this);
-    return ALLOWED_BETS;
+    return goog.array.filter(ALLOWED_BETS, function(bet) {
+      return bet <= this.playerMoney;
+    }, this);
   };
 })();
