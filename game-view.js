@@ -68,18 +68,27 @@ goog.require("lime.Sprite");
     var xPos = (this.width / 2) - (betCount / 2) * (125);
     var yPos = this.height / 2 - 50;
 
-    var label = new lime.Label()
-        .setText("Bet Amount:")
-        .setFontColor("#000")
-        .setFontSize(20)
-        .setPosition(xPos + 15, yPos - 50);
-    node.appendChild(label);
-    goog.array.forEach(game.allowedBets(), function(bet) {
-      var btn = createButton("$" + bet, { width: 75 }, controller.bet.bind(controller, bet));
-      btn.setPosition(xPos, yPos);
-      node.appendChild(btn);
-      xPos += 125;
-    });
+    if (betCount === 0) {
+      var label = new lime.Label()
+          .setText("You lose! (refresh to start over)")
+          .setFontColor("#000")
+          .setFontSize(20)
+          .setPosition(xPos - 100, yPos);
+      node.appendChild(label);
+    } else {
+      var label = new lime.Label()
+          .setText("Bet Amount:")
+          .setFontColor("#000")
+          .setFontSize(20)
+          .setPosition(xPos + 15, yPos - 50);
+      node.appendChild(label);
+      goog.array.forEach(game.allowedBets(), function(bet) {
+        var btn = createButton("$" + bet, { width: 75 }, controller.bet.bind(controller, bet));
+        btn.setPosition(xPos, yPos);
+        node.appendChild(btn);
+        xPos += 125;
+      });
+    }
   };
   
   blackjack.GameView.prototype.renderPlayerActions = function(game, node, controller) {
