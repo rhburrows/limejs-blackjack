@@ -48,6 +48,12 @@ goog.require("lime.Sprite");
   };
 
   blackjack.GameView.prototype.renderGame = function (game, node, controller) {
+    var moneyLabel = new lime.Label()
+        .setText("$" + game.playerMoney)
+        .setFontSize(30)
+        .setPosition(40, this.height - 40);
+    node.appendChild(moneyLabel);
+
     switch (game.state) {
     case "taking-bets":
       this.renderBettingActions(game, node, controller);

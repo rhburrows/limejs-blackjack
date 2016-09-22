@@ -28,6 +28,9 @@ goog.require("blackjack.Hand");
   };
 
   blackjack.Game.prototype.bet = function(amount) {
+    if (amount > this.playerMoney) return;
+
+    this.playerMoney -= amount;
     this.shuffle();
     this.dealerHand = new blackjack.Hand();
     this.playerHands = [ new blackjack.Hand(amount) ];
