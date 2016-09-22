@@ -21,13 +21,16 @@ goog.require("blackjack.GameView");
 
     this.view = new blackjack.GameView(WIDTH, HEIGHT);
     this.scene.appendChild(this.view.view);
-    this.redraw();
   };
 
   blackjack.Controller.prototype.start = function() {
     this.game = new blackjack.Game();
     this.redraw();
     lime.scheduleManager.scheduleWithDelay(this.dealerAction, this, DEALER_DELAY);
+  };
+
+  blackjack.Controller.prototype.bet = function(amount) {
+    this.game.bet(amount);
   };
 
   blackjack.Controller.prototype.dealerAction = function() {

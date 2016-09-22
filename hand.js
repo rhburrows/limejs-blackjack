@@ -1,8 +1,9 @@
 goog.provide("blackjack.Hand");
 
 (function() {
-  blackjack.Hand = function() {
+  blackjack.Hand = function(bet) {
     this.cards = [];
+    this.bet = bet;
   }
 
   blackjack.Hand.prototype.push = function(card) {

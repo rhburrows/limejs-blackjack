@@ -12,6 +12,8 @@ goog.require('blackjack.Controller');
     var director = new lime.Director(document.body);
     var controller = new blackjack.Controller();
     director.replaceScene(controller.scene);
+
+    controller.start();
   };
 
   goog.exportSymbol('blackjack.start', blackjack.start);

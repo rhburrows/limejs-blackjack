@@ -9,31 +9,6 @@ goog.require("lime.Sprite");
   var CARD_WIDTH  = 100;
   var CARD_HEIGHT = CARD_WIDTH * (3.5 / 2.5);
 
-  function createButton(label, opts, callback) {
-    var displayOptions = {
-      fill: "#c00",
-      width: 250,
-      height: 50,
-      borderWidth: 1,
-      borderColor: "#000",
-      fontColor: "#fff"
-    };
-    goog.object.extend(displayOptions, opts);
-
-    var rect = new lime.RoundedRect()
-        .setFill(displayOptions.fill)
-        .setSize(displayOptions.width, displayOptions.height)
-        .setStroke(displayOptions.borderWidth,displayOptions.borderColor);
-    var buttonLabel = new lime.Label()
-        .setText(label)
-        .setFontColor(displayOptions.fontColor);
-    rect.appendChild(buttonLabel);
-
-    goog.events.listen(rect, ['mousedown', 'touchstart'], callback);
-
-    return rect;
-  }
-
   blackjack.GameView = function(width, height) {
     this.width = width;
     this.height = height;
@@ -43,14 +18,10 @@ goog.require("lime.Sprite");
   };
 
   blackjack.GameView.prototype.render = function(controller, game) {
+    if (!game) return;
+
     var newView = new lime.Node();
-    if (!game) {
-      var startButton = createButton("Start Game", {}, controller.start.bind(controller));
-      startButton.setPosition(this.width / 2 - 125, this.height / 2 - 25);
-      newView.appendChild(startButton);
-    } else {
-      addGameView(game, newView);
-    }
+    this.renderGame(game, newView, controller);
 
     if (game && game.state === 'player-wins') {
       this.displayResult("You win!");
@@ -76,24 +47,64 @@ goog.require("lime.Sprite");
     this.view.appendChild(resultLabel);
   };
 
-  function addGameView(game, parentView) {
-    var node = new lime.Node();
+  blackjack.GameView.prototype.renderGame = function (game, node, controller) {
+    switch (game.state) {
+    case "taking-bets":
+      this.renderBettingActions(game, node, controller);
+      break;
+    case "dealing":
+    case "dealer-turn":
+    case "player-turn":
+      this.renderHands(game, node, controller);
+      break;
+    }
+  };
+
+  blackjack.GameView.prototype.renderBettingActions = function(game, node, controller) {
+    var betCount = game.allowedBets.length;
+    var btnWidth = (this.width / betCount) - (50 * betCount);
+    var xPos = (this.width / 2) - (betCount / 2) * (btnWidth + 50);
+    var yPos = this.height / 2 - 50;
+
+    var label = new lime.Label()
+        .setText("Bet Amount:")
+        .setFontColor("#000")
+        .setFontSize(30)
+        .setPosition(xPos + 50, yPos - 75);
+    node.appendChild(label);
+    goog.array.forEach(game.allowedBets, function(bet) {
+      var btn = createButton("$" + bet, { width: btnWidth }, controller.bet.bind(controller, bet));
+      btn.setPosition(xPos, yPos);
+      node.appendChild(btn);
+      xPos += (btnWidth + 50);
+    });
+  };
+  
+  blackjack.GameView.prototype.renderHands = function(game, node, controller) {
+    var parent = new lime.Node();
 
     var dealerHand = new lime.Node().setPosition(200, 100);
-    addHand(game.dealerHand, dealerHand, true);
+    this.renderHand(game.dealerHand, dealerHand, controller, true);
 
     var playerHands = new lime.Node().setPosition(200, 500);
     goog.array.forEach(game.playerHands, function(hand) {
-      addHand(hand, playerHands, false);
-    });
+      this.renderHand(hand, playerHands, controller, false);
+    }, this);
 
-    node.appendChild(dealerHand);
-    node.appendChild(playerHands);
+    parent.appendChild(dealerHand);
+    parent.appendChild(playerHands);
 
-    parentView.appendChild(node);
-  }
+    node.appendChild(parent);
+  };
 
-  function addHand(hand, node, isDealer) {
+  blackjack.GameView.prototype.renderHand = function(hand, node, controller, isDealer) {
+    if (!isDealer) {
+      var label = new lime.Label()
+          .setText("Bet: $" + hand.bet)
+          .setPosition(0, -50);
+      node.appendChild(label);
+    }
+
     var offset = 0;
     for (var i = 0; i < hand.cards.length; i++) {
       var card = hand.cards[i];
@@ -109,5 +120,30 @@ goog.require("lime.Sprite");
 
       offset += 25;
     }
+  };
+
+  function createButton(label, opts, callback) {
+    var displayOptions = {
+      fill: "#c00",
+      width: 250,
+      height: 50,
+      borderWidth: 1,
+      borderColor: "#000",
+      fontColor: "#fff"
+    };
+    goog.object.extend(displayOptions, opts);
+
+    var rect = new lime.RoundedRect()
+        .setFill(displayOptions.fill)
+        .setSize(displayOptions.width, displayOptions.height)
+        .setStroke(displayOptions.borderWidth,displayOptions.borderColor);
+    var buttonLabel = new lime.Label()
+        .setText(label)
+        .setFontColor(displayOptions.fontColor);
+    rect.appendChild(buttonLabel);
+
+    goog.events.listen(rect, ['mousedown', 'touchstart'], callback);
+
+    return rect;
   }
 })();

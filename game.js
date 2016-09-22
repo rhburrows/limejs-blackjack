@@ -22,9 +22,15 @@ goog.require("blackjack.Hand");
   }
 
   blackjack.Game = function() {
+    this.playerMoney = 100;
+    this.state = 'taking-bets';
+    this.allowedBets = [ 10, 20, 50, 100 ];
+  };
+
+  blackjack.Game.prototype.bet = function(amount) {
     this.shuffle();
     this.dealerHand = new blackjack.Hand();
-    this.playerHands = [ new blackjack.Hand() ];
+    this.playerHands = [ new blackjack.Hand(amount) ];
     this.currentHand = this.playerHands[0];
     this.state = 'dealing';
   };
