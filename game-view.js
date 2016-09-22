@@ -53,31 +53,28 @@ goog.require("lime.Sprite");
     }
 
     if (game && game.state === 'player-wins') {
-      var playerWinLabel = new lime.Label()
-          .setText("You win!")
-          .setFontColor("#000")
-          .setFontSize(50)
-          .setPosition(this.width / 2 - 100, this.height / 2);
-      newView.appendChild(playerWinLabel);
+      this.displayResult("You win!");
+      return;
     } else if (game && game.state === 'dealer-wins') {
-      var dealerWinLabel = new lime.Label()
-          .setText("Dealer wins!")
-          .setFontColor("#000")
-          .setFontSize(50)
-          .setPosition(this.width / 2 - 100, this.height / 2);
-      newView.appendChild(dealerWinLabel);
+      this.displayResult("Dealer wins!");
+      return;
     } else if (game && game.state === 'draw') {
-      var drawLabel = new lime.Label()
-          .setText("Its a draw")
-          .setFontColor("#000")
-          .setFontSize(50)
-          .setPosition(this.width / 2 - 100, this.height / 2);
-      newView.appendChild(drawLabel);
+      this.displayResult("Its a draw!");
+      return;
     }
 
     this.view.removeAllChildren();
     this.view.appendChild(newView);
   }
+
+  blackjack.GameView.prototype.displayResult = function(label) {
+    var resultLabel = new lime.Label()
+        .setText(label)
+        .setFontColor("#000")
+        .setFontSize(50)
+        .setPosition(this.width / 2 - 100, this.height / 2);
+    this.view.appendChild(resultLabel);
+  };
 
   function addGameView(game, parentView) {
     var node = new lime.Node();

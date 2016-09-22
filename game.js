@@ -22,15 +22,18 @@ goog.require("blackjack.Hand");
   }
 
   blackjack.Game = function() {
-    this.deck = goog.array.map(goog.array.range(1, 53), function(i) {
-      return intToCard(i);
-    });
-    goog.array.shuffle(this.deck);
-
+    this.shuffle();
     this.dealerHand = new blackjack.Hand();
     this.playerHands = [ new blackjack.Hand() ];
     this.currentHand = this.playerHands[0];
     this.state = 'dealing';
+  };
+
+  blackjack.Game.prototype.shuffle = function() {
+    this.deck = goog.array.map(goog.array.range(1, 53), function(i) {
+      return intToCard(i);
+    });
+    goog.array.shuffle(this.deck);
   };
 
   blackjack.Game.prototype.dealCard = function() {
