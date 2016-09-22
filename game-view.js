@@ -22,18 +22,6 @@ goog.require("lime.Sprite");
 
     var newView = new lime.Node();
     this.renderGame(game, newView, controller);
-
-    if (game && game.state === 'player-wins') {
-      this.displayResult("You win!");
-      return;
-    } else if (game && game.state === 'dealer-wins') {
-      this.displayResult("Dealer wins!");
-      return;
-    } else if (game && game.state === 'draw') {
-      this.displayResult("Its a draw!");
-      return;
-    }
-
     this.view.removeAllChildren();
     this.view.appendChild(newView);
   }
@@ -60,30 +48,37 @@ goog.require("lime.Sprite");
       break;
     case "player-turn":
       this.renderPlayerActions(game, node, controller);
+      this.renderHands(game, node, controller);
+      break;
     case "dealing":
+      this.renderHands(game, node, controller);
+      break;
     case "dealer-turn":
       this.renderHands(game, node, controller);
+      break;
+    case "complete":
+      this.renderHands(game, node, controller);
+      this.renderBettingActions(game, node, controller);
       break;
     }
   };
 
   blackjack.GameView.prototype.renderBettingActions = function(game, node, controller) {
     var betCount = game.allowedBets().length;
-    var btnWidth = (this.width / betCount) - (50 * betCount);
-    var xPos = (this.width / 2) - (betCount / 2) * (btnWidth + 50);
+    var xPos = (this.width / 2) - (betCount / 2) * (125);
     var yPos = this.height / 2 - 50;
 
     var label = new lime.Label()
         .setText("Bet Amount:")
         .setFontColor("#000")
-        .setFontSize(30)
-        .setPosition(xPos + 50, yPos - 75);
+        .setFontSize(20)
+        .setPosition(xPos + 15, yPos - 50);
     node.appendChild(label);
     goog.array.forEach(game.allowedBets(), function(bet) {
-      var btn = createButton("$" + bet, { width: btnWidth }, controller.bet.bind(controller, bet));
+      var btn = createButton("$" + bet, { width: 75 }, controller.bet.bind(controller, bet));
       btn.setPosition(xPos, yPos);
       node.appendChild(btn);
-      xPos += (btnWidth + 50);
+      xPos += 125;
     });
   };
   
@@ -145,7 +140,7 @@ goog.require("lime.Sprite");
       var cardView = new lime.Sprite()
           .setSize(CARD_WIDTH, CARD_HEIGHT)
           .setPosition(offset, 50);
-      if (isDealer && i == 0 && hand.state !== 'won') {
+      if (isDealer && i == 0 && hand.state === 'live') {
         cardView.setFill('images/back.png');
       } else {
         cardView.setFill(card.image);

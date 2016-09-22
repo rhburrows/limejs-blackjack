@@ -42,7 +42,7 @@ goog.require("blackjack.GameView");
       this.game.checkCurrentHand();
       break;
     case "dealer-turn":
-      //this.game.takeDealerAction();
+      this.game.takeDealerAction();
       break;
     } 
 

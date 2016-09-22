@@ -56,6 +56,39 @@ goog.require("blackjack.Hand");
     this.nextHand();
   };
 
+  blackjack.Game.prototype.takeDealerAction = function() {
+    if (this.dealerHand.state === 'live') {
+      this.dealerHand.state = 'processing';
+      // Flipping the face down card counts as an action
+      return;
+    }
+
+    if (this.dealerHand.state !== 'processing') return;
+    if (this.dealerHand.score() < 17) {
+      this.hit();
+    } else {
+      this.checkHands();
+    }
+  };
+
+  blackjack.Game.prototype.checkHands = function() {
+    goog.array.forEach(this.playerHands, function(hand) {
+      if (hand.state != 'waiting') return;
+
+      if (hand.score() > this.dealerHand.score()) {
+        this.playerScore += (2 * hand.bet);
+        hand.win();
+      } else if (this.dealerHand.score() > hand.score()) {
+        hand.lose();
+      } else {
+        this.playerScore += hand.bet;
+        hand.draw();
+      }
+    }, this);
+
+    this.state = 'complete';
+  };
+
   blackjack.Game.prototype.checkCurrentHand = function() {
     if (this.currentHand === this.dealerHand && this.dealerHand.isBlackjack()) {
       this.dealerHand.win();
@@ -67,11 +100,12 @@ goog.require("blackjack.Hand");
     }
 
     if (this.dealerHand.isBlackjack() && this.currentHand.isBlackjack()) {
+      this.playerMoney += this.currentHand.bet;
       this.currentHand.draw();
     } else if (this.dealerHand.isBlackjack()) {
       this.currentHand.lose();
     } else if (this.currentHand.isBlackjack()) {
-      this.playerMoney += this.currentHand.bet;
+      this.playerMoney += (2 * this.currentHand.bet);
       this.currentHand.win();
       this.nextHand();
     }
