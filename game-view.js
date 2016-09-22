@@ -58,9 +58,10 @@ goog.require("lime.Sprite");
     case "taking-bets":
       this.renderBettingActions(game, node, controller);
       break;
+    case "player-turn":
+      this.renderPlayerActions(game, node, controller);
     case "dealing":
     case "dealer-turn":
-    case "player-turn":
       this.renderHands(game, node, controller);
       break;
     }
@@ -86,6 +87,20 @@ goog.require("lime.Sprite");
     });
   };
   
+  blackjack.GameView.prototype.renderPlayerActions = function(game, node, controller) {
+    var actions = game.userActions();
+    var offset = (this.width / 2) - (75 * actions.length);
+
+    goog.array.forEach(actions, function(action) {
+      var btn = createButton(goog.string.toTitleCase(action),
+                             { width: 75 },
+                             game[action].bind(game))
+          .setPosition(offset, this.height - 50);
+      node.appendChild(btn);
+      offset += 100;
+    }, this);
+  };
+
   blackjack.GameView.prototype.renderHands = function(game, node, controller) {
     var parent = new lime.Node();
 
@@ -95,6 +110,13 @@ goog.require("lime.Sprite");
     var playerHands = new lime.Node().setPosition(200, 500);
     goog.array.forEach(game.playerHands, function(hand) {
       this.renderHand(hand, playerHands, controller, false);
+      if (hand === game.currentHand && game.state === 'player-turn') {
+        var highlight = new lime.Sprite()
+            .setSize(75, 5)
+            .setFill('#fff')
+            .setPosition(0, -35);
+        playerHands.appendChild(highlight);
+      }
     }, this);
 
     parent.appendChild(dealerHand);

@@ -49,18 +49,11 @@ goog.require("blackjack.Hand");
     if (this.state !== 'dealing') return;
 
     this.currentHand.push(this.deck.pop());
-    var currentHandIndex = this.playerHands.indexOf(this.currentHand);
-    if (currentHandIndex === -1) {
-      if (this.currentHand.cards.length == 2) {
-        this.state = 'player-turn';
-      }
-
-      this.currentHand = this.playerHands[0];
-    } else if (currentHandIndex === this.playerHands.length - 1) {
-      this.currentHand = this.dealerHand;
-    } else {
-      this.currentHand = this.playerHands[currentHandIndex + 1];
+    if (this.currentHand === this.dealerHand && this.dealerHand.cards.length == 2) {
+      this.state = 'player-turn';
     }
+
+    this.nextHand();
   };
 
   blackjack.Game.prototype.checkForBlackjacks = function() {
@@ -73,4 +66,34 @@ goog.require("blackjack.Hand");
     }
   };
 
+  blackjack.Game.prototype.nextHand = function() {
+    var currentHandIndex = this.playerHands.indexOf(this.currentHand);
+    if (currentHandIndex === -1) {
+      this.currentHand = this.playerHands[0];
+    } else if (currentHandIndex === this.playerHands.length - 1) {
+      this.currentHand = this.dealerHand;
+    } else {
+      this.currentHand = this.playerHands[currentHandIndex + 1];
+    }
+  };
+
+  blackjack.Game.prototype.stand = function() {
+    this.nextHand();
+    if (this.currentHand === this.dealerHand) {
+      this.state = 'dealer-turn';
+    }
+  };
+
+  blackjack.Game.prototype.hit = function() {
+    this.currentHand.push(this.deck.pop());
+  }
+
+  blackjack.Game.prototype.userActions = function() {
+    switch (this.state) {
+    case 'player-turn':
+      return this.currentHand.possibleActions();
+    default:
+      return [];
+    }
+  };
 })();

@@ -35,5 +35,9 @@ goog.provide("blackjack.Hand");
 
   blackjack.Hand.prototype.isBlackjack = function() {
     return this.score() === 21 && this.cards.length === 2;
-  }
+  };
+
+  blackjack.Hand.prototype.possibleActions = function() {
+    return ['hit', 'stand'];
+  };
 })();
