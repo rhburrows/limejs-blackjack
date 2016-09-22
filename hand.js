@@ -31,7 +31,8 @@ goog.provide("blackjack.Hand");
       aceCount--;
     }
 
-    return score;
+    // Just mark bust a 0 to be simpler
+    return (score > 21) ? 0 : score;
   };
 
   blackjack.Hand.prototype.isBlackjack = function() {
