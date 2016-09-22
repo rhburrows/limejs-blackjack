@@ -84,15 +84,14 @@ goog.require("lime.Sprite");
   
   blackjack.GameView.prototype.renderPlayerActions = function(game, node, controller) {
     var actions = game.userActions();
-    var offset = (this.width / 2) - (75 * actions.length);
+    var offset = (this.width / 2) -
+        (150 * (goog.object.getKeys(actions).length / 2));
 
-    goog.array.forEach(actions, function(action) {
-      var btn = createButton(goog.string.toTitleCase(action),
-                             { width: 75 },
-                             game[action].bind(game))
+    goog.object.forEach(actions, function(action, name) {
+      var btn = createButton(name, { width: 100 }, action)
           .setPosition(offset, this.height - 50);
       node.appendChild(btn);
-      offset += 100;
+      offset += 150;
     }, this);
   };
 

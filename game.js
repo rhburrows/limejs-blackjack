@@ -164,13 +164,35 @@ goog.require("blackjack.Hand");
     }
   }
 
-  blackjack.Game.prototype.userActions = function() {
-    switch (this.state) {
-    case 'player-turn':
-      return this.currentHand.possibleActions();
-    default:
-      return [];
+  blackjack.Game.prototype.doubleDown = function() {
+    this.playerMoney -= this.currentHand.bet;
+    this.currentHand.bet *= 2;
+
+    this.currentHand.push(this.deck.pop());
+    if (this.currentHand.score() > 21) {
+      this.currentHand.lose();
+    } else {
+      this.currentHand.stand();
     }
+    this.nextHand();
+  };
+
+  blackjack.Game.prototype.userActions = function() {
+    var actions = {};
+
+    if (this.state == 'player-turn') {
+      if (this.currentHand.score() < 21) {
+        actions["Hit"] = this.hit.bind(this);
+        actions["Stand"] = this.stand.bind(this);
+      }
+
+      if (this.currentHand.cards.length === 2 &&
+          this.playerMoney >= this.currentHand.bet) {
+        actions["Double Down"] = this.doubleDown.bind(this);
+      }
+    }
+
+    return actions;
   };
 
   blackjack.Game.prototype.allowedBets = function() {
